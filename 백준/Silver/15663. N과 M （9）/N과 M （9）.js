@@ -9,32 +9,35 @@ function solution() {
     .map(Number)
     .sort((a, b) => a - b);
   const temp = [];
-  const answer = [];
+  const countMap = new Map();
 
-  function backtrack(start) {
-    if (
-      temp.filter((val) => val === nums[start]).length >
-      nums.filter((val) => val === nums[start]).length
-    )
-      return;
+  nums.forEach((num) => countMap.set(num, (countMap.get(num) || 0) + 1));
 
-    if (temp.length === M) {
-      answer.push([...temp]);
+  function backtrack(depth) {
+    if (depth === M) {
+      console.log(temp.join(" "));
       return;
     }
 
+    let prevNum = -1;
+
     for (let i = 0; i < N; i++) {
-      temp.push(nums[i]);
-      backtrack(i);
+      const num = nums[i];
+
+      if (prevNum === num || (countMap.get(num) || 0) === 0) continue;
+
+      prevNum = num;
+      temp.push(num);
+      countMap.set(num, countMap.get(num) - 1);
+
+      backtrack(depth + 1);
+
       temp.pop();
+      countMap.set(num, countMap.get(num) + 1);
     }
   }
 
   backtrack(0);
-
-  [...new Set(answer.map((arr) => arr.join(" ")))].forEach((val) =>
-    console.log(val)
-  );
 }
 
 solution();
