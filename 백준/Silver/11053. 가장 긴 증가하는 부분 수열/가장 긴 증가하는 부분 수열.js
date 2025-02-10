@@ -4,16 +4,16 @@ const input = fs.readFileSync(filePath, "utf8").toString().trim().split("\n");
 
 const solution = () => {
   const nums = input[1].split(" ").map(Number);
-  const dp = new Array(1001).fill(0);
+  const dp = new Array(nums.length).fill(1);
 
-  for (const num of nums) {
-    dp[num] = 1;
-    for (let i = 1; i < num; i++) {
-      if (nums.includes(i)) {
-        dp[num] = Math.max(dp[num], dp[i] + 1);
+  for (let i = 1; i < nums.length; i++) {
+    for (let j = 0; j < i; j++) {
+      if (nums[i] > nums[j]) {
+        dp[i] = Math.max(dp[i], dp[j] + 1);
       }
     }
   }
+
   console.log(Math.max(...dp));
 };
 
