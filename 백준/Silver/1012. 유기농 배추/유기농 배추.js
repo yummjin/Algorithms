@@ -3,65 +3,71 @@ const filePath = process.platform === "linux" ? 0 : "input.txt";
 const input = fs.readFileSync(filePath, "utf8").toString().trim().split("\n");
 
 const solution = () => {
-  const N = parseInt(input[0]);
-  let endpoint = 1;
+    let index = 1
+    while (index < input.length) {
+        // console.log(`index: ${index}`)
+        const [x, y, n] = input[index].split(" ").map(Number);
+        // console.log(`x: ${x}, y: ${y}, z: ${n}`)
 
-  for (let i = 0; i < N; i++) {
-    const [row, col, cnt] = input[endpoint]
-      .split(" ")
-      .map((val) => parseInt(val));
-    const field = new Field(row, col);
-    const visited = new Field(row, col);
-    let worm = 0;
+        let groupCnt = 0;
 
-    for (let i = 0; i < cnt; i++) {
-      const [r, c] = input[i + endpoint + 1]
-        .split(" ")
-        .map((val) => parseInt(val));
-      field.field[c][r] = 1;
-    }
+        const field = Array.from({ length: y }, () => Array(x).fill(0));
 
-    for (let i = 0; i < row; i++) {
-      for (let j = 0; j < col; j++) {
-        if (field.field[j][i] === 1 && visited.field[j][i] === 0) {
-          dfs(field.field, visited, j, i);
-          worm++;
+        for (let i = index + 1; i <= index + n; i++) {
+            const [x, y] = input[i].split(" ").map(Number);
+            field[y][x] = 1;
         }
-      }
+
+        for (let x = 0; x < field.length; x++) {
+            for (let y = 0; y < field[0].length; y++) {
+                if (field[x][y] === 1) {
+                    groupCnt++;
+                    field[x][y] = -1;
+                    findGroup(x, y, field);
+                }
+            }
+        }
+
+        // printField(field)
+
+        console.log(groupCnt === 0 ? n : groupCnt);
+        index = index + n + 1
     }
 
-    endpoint = endpoint + cnt + 1;
-    console.log(worm);
-  }
 };
 
-function dfs(field, visited, x, y) {
-  visited.field[x][y] = 1;
+function findGroup(x, y, field) {
+    const n = field.length;
+    const m = field[0].length;
 
-  if (x > 0) {
-    if (field[x - 1][y] === 1 && visited.field[x - 1][y] === 0)
-      dfs(field, visited, x - 1, y);
-  }
-  if (y > 0) {
-    if (field[x][y - 1] === 1 && visited.field[x][y - 1] === 0)
-      dfs(field, visited, x, y - 1);
-  }
-  if (y + 1 < visited.row) {
-    if (field[x][y + 1] === 1 && visited.field[x][y + 1] === 0)
-      dfs(field, visited, x, y + 1);
-  }
-  if (x + 1 < visited.col) {
-    if (field[x + 1][y] === 1 && visited.field[x + 1][y] === 0)
-      dfs(field, visited, x + 1, y);
-  }
+    const directions = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+
+    for (const [dx, dy] of directions) {
+        const newX = x + dx;
+        const newY = y + dy;
+
+        if (newX < 0 || newY < 0 || newX >= n || newY >= m) continue;
+
+
+        if (newX >= 0 && newY >= 0) {
+            if (field[newX][newY] === 0) continue;
+
+            if (field[newX][newY] === 1) {
+                field[newX][newY] = -1;
+                findGroup(newX, newY, field);
+            }
+        }
+
+    }
+
 }
 
-class Field {
-  constructor(row, col) {
-    this.row = row;
-    this.col = col;
-    this.field = Array.from(Array(col), () => Array(row).fill(0));
-  }
-}
+// function printField(field) {
+//     for (const f of field) {
+//         f.forEach((v) => process.stdout.write(String(v)))
+//         console.log()
+//     }
+// }
+
 
 solution();
